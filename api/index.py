@@ -75,45 +75,6 @@ class SimpleQueryResponse(BaseModel):
     error: Optional[str] = None
 
 # Helper Functions
-def _get_fallback_sql(query: str) -> Optional[str]:
-    """Generate simple fallback SQL for common queries when AI is unavailable"""
-    query_lower = query.lower().strip()
-    
-    # Customer queries
-    if 'show' in query_lower and 'customer' in query_lower:
-        return "SELECT * FROM customers LIMIT 10"
-    elif 'count' in query_lower and 'customer' in query_lower:
-        return "SELECT COUNT(*) as count FROM customers"
-    elif 'list' in query_lower and 'customer' in query_lower:
-        return "SELECT * FROM customers LIMIT 10"
-    elif 'all customer' in query_lower:
-        return "SELECT * FROM customers"
-    elif 'customer' in query_lower and ('high' in query_lower or 'revenue' in query_lower):
-        return "SELECT * FROM customers WHERE revenue > 10000 ORDER BY revenue DESC LIMIT 10"
-    elif 'customer' in query_lower:
-        return "SELECT * FROM customers LIMIT 10"
-    
-    # Order queries  
-    elif 'show' in query_lower and 'order' in query_lower:
-        return "SELECT * FROM orders LIMIT 10"
-    elif 'count' in query_lower and 'order' in query_lower:
-        return "SELECT COUNT(*) as count FROM orders"
-    elif 'list' in query_lower and 'order' in query_lower:
-        return "SELECT * FROM orders LIMIT 10"
-    elif 'all order' in query_lower:
-        return "SELECT * FROM orders"
-    elif 'order' in query_lower:
-        return "SELECT * FROM orders LIMIT 10"
-    
-    # Generic patterns
-    elif 'show' in query_lower:
-        return "SELECT * FROM customers LIMIT 5"
-    elif 'count' in query_lower:
-        return "SELECT COUNT(*) as count FROM customers"
-    elif 'list' in query_lower:
-        return "SELECT * FROM customers LIMIT 5"
-    else:
-        return None
 
 # API Endpoints
 @app.get("/")
@@ -131,7 +92,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now().isoformat(),
         "service": "simple-text-to-query"
     }
 
@@ -139,68 +100,29 @@ async def process_text_query(request: SimpleQueryRequest) -> SimpleQueryResponse
     """
     Process text-to-query logic for both endpoints
     """
-    start_time = datetime.utcnow()
+    start_time = datetime.now()
     
     try:
         logger.info(f"Processing query: {request.query}")
-        
-        # Try to generate SQL using Gemini
-        generated_sql = ""
-        try:
-            generated_sql = gemini_sql.generate_sql(request.query)
-            logger.info(f"Generated SQL using Gemini: {generated_sql}")
-        except Exception as e:
-            # Handle API quota or other Gemini errors
-            logger.warning(f"Gemini API failed: {str(e)[:100]}...")
-            if "quota" in str(e).lower() or "429" in str(e):
-                # Try simple query patterns when AI is unavailable
-                fallback_sql = _get_fallback_sql(request.query)
-                if fallback_sql:
-                    generated_sql = fallback_sql
-                    logger.info(f"Using fallback SQL: {fallback_sql}")
-                else:
-                    return SimpleQueryResponse(
-                        success=False,
-                        query=request.query,
-                        generated_sql="",
-                        results=[{
-                            "error": "AI service temporarily unavailable",
-                            "message": "Please try again in a moment, or use simpler queries",
-                            "suggestions": [
-                                "Try: 'show customers'",
-                                "Try: 'count customers'", 
-                                "Try: 'list all customers'",
-                                "Try: 'show orders'"
-                            ]
-                        }],
-                        execution_time=0,
-                        row_count=1,
-                        error="AI quota exceeded - try simpler queries or wait a moment"
-                    )
-            else:
-                # For other errors, try fallback first
-                fallback_sql = _get_fallback_sql(request.query)
-                if fallback_sql:
-                    generated_sql = fallback_sql
-                    logger.info(f"Using fallback SQL due to other error: {fallback_sql}")
-                else:
-                    raise e
-        
-        # Ensure we have valid SQL
+        generated_sql = gemini_sql.generate_sql(request.query)
+        logger.info(f"Generated SQL using Gemini: {generated_sql}")
+
+        # If Gemini fails to generate a valid SQL, return error
         if not generated_sql or "ERROR:" in generated_sql or "Failed to generate" in generated_sql:
-            # Use fallback SQL if no valid SQL generated
-            fallback_sql = _get_fallback_sql(request.query)
-            if fallback_sql:
-                generated_sql = fallback_sql
-                logger.info(f"Using fallback SQL as final option: {fallback_sql}")
-            else:
-                generated_sql = "SELECT 'Query pattern not recognized' as message, 'Try: show customers, count customers, show orders' as suggestion"
-        
+            return SimpleQueryResponse(
+                success=False,
+                query=request.query,
+                generated_sql=generated_sql,
+                results=[],
+                execution_time=(datetime.now() - start_time).total_seconds(),
+                row_count=0,
+                error="Gemini could not generate a valid SQL for this query."
+            )
+
         # Execute the query directly on Supabase
         results = await supabase_manager.execute_sql_query(generated_sql, request.max_results)
-        
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
-        
+        execution_time = (datetime.now() - start_time).total_seconds()
+
         response = SimpleQueryResponse(
             success=True,
             query=request.query,
@@ -209,7 +131,7 @@ async def process_text_query(request: SimpleQueryRequest) -> SimpleQueryResponse
             execution_time=execution_time,
             row_count=len(results)
         )
-        
+
         # Add explanation if requested and AI is available
         if request.explain:
             try:
@@ -217,14 +139,13 @@ async def process_text_query(request: SimpleQueryRequest) -> SimpleQueryResponse
                 response.explanation = explanation
             except:
                 response.explanation = "AI explanation temporarily unavailable"
-        
+
         logger.info(f"Query executed successfully - {len(results)} rows in {execution_time:.2f}s")
         return response
-        
+
     except Exception as e:
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
+        execution_time = (datetime.now() - start_time).total_seconds()
         logger.error(f"Query processing failed: {str(e)}")
-        
         return SimpleQueryResponse(
             success=False,
             query=request.query,
