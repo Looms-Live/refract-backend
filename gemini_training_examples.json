@@ -30,6 +30,11 @@
     "explanation": "This query lists all customers sorted by revenue in ascending order."
   },
   {
+    "question": "List customers in descending order of revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue DESC;",
+    "explanation": "This query lists all customers sorted by revenue in descending order."
+  },
+  {
     "question": "List customers with high revenue",
     "sql": "SELECT * FROM customers WHERE revenue > 10000 ORDER BY revenue DESC;",
     "explanation": "This query lists customers whose revenue is greater than $10,000, sorted by revenue descending."
@@ -48,5 +53,155 @@
     "question": "Show customers from New York",
     "sql": "SELECT * FROM customers WHERE state = 'NY';",
     "explanation": "This query lists all customers from New York."
+  },
+  {
+    "question": "Show all customers",
+    "sql": "SELECT * FROM customers;",
+    "explanation": "Lists all customers."
+  },
+  {
+    "question": "Show all orders",
+    "sql": "SELECT * FROM orders;",
+    "explanation": "Lists all orders."
+  },
+  {
+    "question": "List customers in ascending order of revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue ASC;",
+    "explanation": "Lists customers sorted by revenue ascending."
+  },
+  {
+    "question": "List customers in descending order of revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue DESC;",
+    "explanation": "Lists customers sorted by revenue descending."
+  },
+  {
+    "question": "Show customers with high revenue",
+    "sql": "SELECT * FROM customers WHERE revenue > 10000 ORDER BY revenue DESC;",
+    "explanation": "Lists customers with revenue above $10,000."
+  },
+  {
+    "question": "Show customers from California",
+    "sql": "SELECT * FROM customers WHERE state = 'CA';",
+    "explanation": "Lists customers from California."
+  },
+  {
+    "question": "Show customers from New York",
+    "sql": "SELECT * FROM customers WHERE state = 'NY';",
+    "explanation": "Lists customers from New York."
+  },
+  {
+    "question": "Count all customers",
+    "sql": "SELECT COUNT(*) as customer_count FROM customers;",
+    "explanation": "Counts total customers."
+  },
+  {
+    "question": "Count all orders",
+    "sql": "SELECT COUNT(*) as order_count FROM orders;",
+    "explanation": "Counts total orders."
+  },
+  {
+    "question": "Show pending orders",
+    "sql": "SELECT * FROM orders WHERE status = 'pending';",
+    "explanation": "Lists orders with status pending."
+  },
+  {
+    "question": "Show completed orders",
+    "sql": "SELECT * FROM orders WHERE status = 'completed';",
+    "explanation": "Lists orders with status completed."
+  },
+  {
+    "question": "Show refunded orders",
+    "sql": "SELECT * FROM orders WHERE status = 'refunded';",
+    "explanation": "Lists orders with status refunded."
+  },
+  {
+    "question": "Show orders for customer John Doe",
+    "sql": "SELECT * FROM orders WHERE customer_id = (SELECT id FROM customers WHERE name = 'John Doe');",
+    "explanation": "Lists orders for John Doe."
+  },
+  {
+    "question": "Show orders above $500",
+    "sql": "SELECT * FROM orders WHERE amount > 500;",
+    "explanation": "Lists orders with amount above $500."
+  },
+  {
+    "question": "Show orders below $100",
+    "sql": "SELECT * FROM orders WHERE amount < 100;",
+    "explanation": "Lists orders with amount below $100."
+  },
+  {
+    "question": "Show orders from this month",
+    "sql": "SELECT * FROM orders WHERE order_date >= date('now', 'start of month');",
+    "explanation": "Lists orders from the current month."
+  },
+  {
+    "question": "Show orders from last month",
+    "sql": "SELECT * FROM orders WHERE order_date >= date('now', '-1 month', 'start of month') AND order_date < date('now', 'start of month');",
+    "explanation": "Lists orders from last month."
+  },
+  {
+    "question": "Show customers who joined this year",
+    "sql": "SELECT * FROM customers WHERE created_at >= date('now', 'start of year');",
+    "explanation": "Lists customers who joined this year."
+  },
+  {
+    "question": "Show top 5 customers by revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue DESC LIMIT 5;",
+    "explanation": "Lists top 5 customers by revenue."
+  },
+  {
+    "question": "Show bottom 5 customers by revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue ASC LIMIT 5;",
+    "explanation": "Lists bottom 5 customers by revenue."
+  },
+  {
+    "question": "Show customers with email ending in .com",
+    "sql": "SELECT * FROM customers WHERE email LIKE '%.com';",
+    "explanation": "Lists customers with .com emails."
+  },
+  {
+    "question": "Show customers from San Francisco",
+    "sql": "SELECT * FROM customers WHERE city = 'San Francisco';",
+    "explanation": "Lists customers from San Francisco."
+  },
+  {
+    "question": "Show customers with company name containing 'Tech'",
+    "sql": "SELECT * FROM customers WHERE company LIKE '%Tech%';",
+    "explanation": "Lists customers with 'Tech' in company name."
+  },
+  {
+    "question": "Show orders for product 'AI Subscription'",
+    "sql": "SELECT * FROM orders WHERE product_name = 'AI Subscription';",
+    "explanation": "Lists orders for AI Subscription."
+  },
+  {
+    "question": "Show total revenue from customers",
+    "sql": "SELECT SUM(revenue) as total_revenue FROM customers;",
+    "explanation": "Sums all customer revenue."
+  },
+  {
+    "question": "Show total amount from orders",
+    "sql": "SELECT SUM(amount) as total_amount FROM orders;",
+    "explanation": "Sums all order amounts."
+  },
+  {
+    "question": "Show average revenue per customer",
+    "sql": "SELECT AVG(revenue) as avg_revenue FROM customers;",
+    "explanation": "Calculates average customer revenue."
+  },
+  {
+    "question": "Show average order amount",
+    "sql": "SELECT AVG(amount) as avg_order_amount FROM orders;",
+    "explanation": "Calculates average order amount."
+  },
+  {
+    "question": "Show customers who have placed more than 5 orders",
+    "sql": "SELECT c.* FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.id HAVING COUNT(o.id) > 5;",
+    "explanation": "Lists customers with more than 5 orders."
+  },
+  {
+    "question": "Show customers with no orders",
+    "sql": "SELECT * FROM customers WHERE id NOT IN (SELECT customer_id FROM orders);",
+    "explanation": "Lists customers who have never placed an order."
   }
 ]
