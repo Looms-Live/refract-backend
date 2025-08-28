@@ -175,40 +175,15 @@ def train_gemini_sql():
     gemini_sql.add_business_context("Status can be: 'pending', 'completed', 'cancelled', 'refunded'")
     gemini_sql.add_business_context("Revenue is monthly recurring revenue (MRR)")
     
-    # Add training examples
-    training_examples = [
-        {
-            "question": "Who are my top customers by revenue?",
-            "sql": "SELECT name, company, revenue FROM customers ORDER BY revenue DESC LIMIT 10;",
-            "explanation": "This query selects customer names, companies, and revenue, sorted by revenue in descending order to show the highest revenue customers first."
-        },
-        {
-            "question": "How many orders do we have this month?",
-            "sql": "SELECT COUNT(*) as total_orders FROM orders WHERE order_date >= date('now', 'start of month');",
-            "explanation": "This counts all orders from the beginning of the current month."
-        },
-        {
-            "question": "What's our total revenue?",
-            "sql": "SELECT SUM(revenue) as total_revenue FROM customers;",
-            "explanation": "This sums up all customer revenue to get the total."
-        },
-        {
-            "question": "Show me pending orders",
-            "sql": "SELECT o.*, c.name as customer_name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.status = 'pending';",
-            "explanation": "This shows all pending orders with customer names by joining the orders and customers tables."
-        },
-        {
-            "question": "Customers from California",
-            "sql": "SELECT * FROM customers WHERE state = 'CA';",
-            "explanation": "This selects all customers who are located in California."
-        }
-    ]
-    
+    # Load training examples from JSON file
+    examples_path = os.path.join(os.path.dirname(__file__), "gemini_training_examples.json")
+    with open(examples_path, "r") as f:
+        training_examples = json.load(f)
     for example in training_examples:
         gemini_sql.add_training_example(
             example["question"],
             example["sql"],
-            example["explanation"]
+            example.get("explanation", "")
         )
     
     print("✅ Training completed!")

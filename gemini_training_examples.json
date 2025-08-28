@@ -1,0 +1,52 @@
+[
+  {
+    "question": "Who are my top customers by revenue?",
+    "sql": "SELECT name, company, revenue FROM customers ORDER BY revenue DESC LIMIT 10;",
+    "explanation": "This query selects customer names, companies, and revenue, sorted by revenue in descending order to show the highest revenue customers first."
+  },
+  {
+    "question": "How many orders do we have this month?",
+    "sql": "SELECT COUNT(*) as total_orders FROM orders WHERE order_date >= date('now', 'start of month');",
+    "explanation": "This counts all orders from the beginning of the current month."
+  },
+  {
+    "question": "What's our total revenue?",
+    "sql": "SELECT SUM(revenue) as total_revenue FROM customers;",
+    "explanation": "This sums up all customer revenue to get the total."
+  },
+  {
+    "question": "Show me pending orders",
+    "sql": "SELECT o.*, c.name as customer_name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.status = 'pending';",
+    "explanation": "This shows all pending orders with customer names by joining the orders and customers tables."
+  },
+  {
+    "question": "Customers from California",
+    "sql": "SELECT * FROM customers WHERE state = 'CA';",
+    "explanation": "This selects all customers who are located in California."
+  },
+  {
+    "question": "List customers in ascending order of revenue",
+    "sql": "SELECT * FROM customers ORDER BY revenue ASC;",
+    "explanation": "This query lists all customers sorted by revenue in ascending order."
+  },
+  {
+    "question": "List customers with high revenue",
+    "sql": "SELECT * FROM customers WHERE revenue > 10000 ORDER BY revenue DESC;",
+    "explanation": "This query lists customers whose revenue is greater than $10,000, sorted by revenue descending."
+  },
+  {
+    "question": "Show all orders",
+    "sql": "SELECT * FROM orders;",
+    "explanation": "This query shows all orders."
+  },
+  {
+    "question": "Count all customers",
+    "sql": "SELECT COUNT(*) as customer_count FROM customers;",
+    "explanation": "This query counts the total number of customers."
+  },
+  {
+    "question": "Show customers from New York",
+    "sql": "SELECT * FROM customers WHERE state = 'NY';",
+    "explanation": "This query lists all customers from New York."
+  }
+]
