@@ -1,23 +1,23 @@
-# Use official Python 3.11 image
+# Use official Python 3.11 slim image
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
+# Install only required system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
     libpq-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Install dependencies separately for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy only the app code (skip .git, venv, etc. via .dockerignore)
 COPY . .
 
-# Render expects apps to listen on $PORT
+# Render sets $PORT automatically
 EXPOSE 8000
 
 # Start FastAPI with Uvicorn
